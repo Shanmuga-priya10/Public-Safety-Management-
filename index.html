@@ -1,0 +1,1977 @@
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Safety System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .hidden {
+            display: none;
+        }
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            max-width: 500px;
+        }
+        .dashboard-container {
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: linear-gradient(to right, #4f46e5, #7c3aed);
+            color: white;
+            font-weight: 600;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 200px;
+        }
+        .dashboard-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(to right, #4338ca, #6d28d9);
+        }
+        .dashboard-button svg {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    
+    <div id="login-page" class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
+        <form id="login-form" class="space-y-4">
+            <div>
+                <label for="login-username" class="block text-sm font-medium text-gray-700">Username</label>
+                <input type="text" id="login-username" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+            </div>
+            <div>
+                <label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="login-password" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Sign In</button>
+        </form>
+        <button id="show-register" class="mt-4 w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500">Sign Up</button>
+        <p id="login-error" class="mt-2 text-center text-red-600 hidden"></p>
+    </div>
+
+    <div id="register-page" class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md hidden">
+        <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Register</h2>
+        <form id="register-form" class="space-y-4">
+            <div>
+                <label for="register-username" class="block text-sm font-medium text-gray-700">Username</label>
+                <input type="text" id="register-username" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+            </div>
+            <div>
+                <label for="register-password" class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="register-password" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Register</button>
+        </form>
+        <p class="mt-4 text-center text-sm text-gray-600">
+            Already have an account? <a href="#" id="show-login" class="text-indigo-600 hover:underline">Login</a>
+        </p>
+        <p id="register-error" class="mt-2 text-center text-red-600 hidden"></p>
+    </div>
+
+    <div id="dashboard-page" class="w-full max-w-7xl p-6 hidden">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-gray-800">Public Safety Dashboard</h2>
+            <button id="logout-button" class="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700">Logout</button>
+        </div>
+        <div class="dashboard-container">
+            <div class="flex flex-col space-y-6 items-center">
+                <button id="incidents-btn" class="dashboard-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                    </svg>
+                    Incidents
+                </button>
+                <button id="personnel-btn" class="dashboard-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    Personnel
+                </button>
+                <button id="response-units-btn" class="dashboard-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Response Units
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="incidents-page" class="w-full max-w-7xl p-6 hidden">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Incidents</h2>
+            <button id="back-to-dashboard-from-incidents" class="bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700">Back to Dashboard</button>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-md">
+            <button id="add-incident-btn" class="mb-4 bg-green-600 text-white py-1 px-3 rounded-md hover:bg-green-700">Add Incident</button>
+            <div class="table-container">
+                <table class="w-full text-sm text-left text-gray-600">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2">Type</th>
+                            <th class="px-4 py-2">Location</th>
+                            <th class="px-4 py-2">Severity</th>
+                            <th class="px-4 py-2">Status</th>
+                            <th class="px-4 py-2">Date/Time</th>
+                            <th class="px-4 py-2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="incidents-table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="personnel-page" class="w-full max-w-7xl p-6 hidden">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Personnel</h2>
+            <button id="back-to-dashboard-from-personnel" class="bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700">Back to Dashboard</button>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-md">
+            <button id="add-personnel-btn" class="mb-4 bg-green-600 text-white py-1 px-3 rounded-md hover:bg-green-700">Add Personnel</button>
+            <div class="table-container">
+                <table class="w-full text-sm text-left text-gray-600">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2">Name</th>
+                            <th class="px-4 py-2">Role</th>
+                            <th class="px-4 py-2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="personnel-table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="response-units-page" class="w-full max-w-7xl p-6 hidden">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Response Units</h2>
+            <button id="back-to-dashboard-from-response-units" class="bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700">Back to Dashboard</button>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-md">
+            <button id="add-response-unit-btn" class="mb-4 bg-green-600 text-white py-1 px-3 rounded-md hover:bg-green-700">Add Response Unit</button>
+            <div class="table-container">
+                <table class="w-full text-sm text-left text-gray-600">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2">Type</th>
+                            <th class="px-4 py-2">Status</th>
+                            <th class="px-4 py-2">Arrival Time</th>
+                            <th class="px-4 py-2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="response-units-table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="incident-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="incident-modal-title" class="text-lg font-bold mb-4"></h3>
+            <form id="incident-form">
+                <div class="mb-4">
+                    <label for="incident-type" class="block text-sm font-medium text-gray-700">Type</label>
+                    <input type="text" id="incident-type" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                </div>
+                <div class="mb-4">
+                    <label for="incident-location" class="block text-sm font-medium text-gray-700">Location</label>
+                    <input type="text" id="incident-location" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                </div>
+                <div class="mb-4">
+                    <label for="incident-severity" class="block text-sm font-medium text-gray-700">Severity</label>
+                    <select id="incident-severity" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="incident-status" class="block text-sm font-medium text-gray-700">Status</label>
+                    <select id="incident-status" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="Active">Active</option>
+                        <option value="Resolved">Resolved</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="incident-date-time" class="block text-sm font-medium text-gray-700">Date/Time</label>
+                    <input type="datetime-local" id="incident-date-time" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" id="incident-modal-close" class="bg-gray-300 text-gray-800 py-1 px-3 rounded-md hover:bg-gray-400">Cancel</button>
+                    <button type="submit" id="incident-modal-save" class="bg-indigo-600 text-white py-1 px-3 rounded-md hover:bg-indigo-700">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="personnel-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="personnel-modal-title" class="text-lg font-bold mb-4"></h3>
+            <form id="personnel-form">
+                <div class="mb-4">
+                    <label for="personnel-name" class="block text-sm font-medium text-gray-700">Name</label>
+                    <input type="text" id="personnel-name" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                </div>
+                <div class="mb-4">
+                    <label for="personnel-role" class="block text-sm font-medium text-gray-700">Role</label>
+                    <input type="text" id="personnel-role" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" id="personnel-modal-close" class="bg-gray-300 text-gray-800 py-1 px-3 rounded-md hover:bg-gray-400">Cancel</button>
+                    <button type="submit" id="personnel-modal-save" class="bg-indigo-600 text-white py-1 px-3 rounded-md hover:bg-indigo-700">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="response-unit-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="response-unit-modal-title" class="text-lg font-bold mb-4"></h3>
+            <form id="response-unit-form">
+                <div class="mb-4">
+                    <label for="response-unit-type" class="block text-sm font-medium text-gray-700">Type</label>
+                    <input type="text" id="response-unit-type" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                </div>
+                <div class="mb-4">
+                    <label for="response-unit-status" class="block text-sm font-medium text-gray-700">Status</label>
+                    <select id="response-unit-status" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="Available">Available</option>
+                        <option value="Assigned">Assigned</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="response-unit-arrival-time" class="block text-sm font-medium text-gray-700">Arrival Time (optional)</label>
+                    <input type="datetime-local" id="response-unit-arrival-time" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md">
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" id="response-unit-modal-close" class="bg-gray-300 text-gray-800 py-1 px-3 rounded-md hover:bg-gray-400">Cancel</button>
+                    <button type="submit" id="response-unit-modal-save" class="bg-indigo-600 text-white py-1 px-3 rounded-md hover:bg-indigo-700">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Page Navigation
+        const loginPage = document.getElementById('login-page');
+        const registerPage = document.getElementById('register-page');
+        const dashboardPage = document.getElementById('dashboard-page');
+        const incidentsPage = document.getElementById('incidents-page');
+        const personnelPage = document.getElementById('personnel-page');
+        const responseUnitsPage = document.getElementById('response-units-page');
+
+        function showPage(page) {
+            loginPage.classList.add('hidden');
+            registerPage.classList.add('hidden');
+            dashboardPage.classList.add('hidden');
+            incidentsPage.classList.add('hidden');
+            personnelPage.classList.add('hidden');
+            responseUnitsPage.classList.add('hidden');
+            page.classList.remove('hidden');
+            page.classList.add('fade-in');
+        }
+
+        document.getElementById('show-register').addEventListener('click', () => showPage(registerPage));
+        document.getElementById('show-login').addEventListener('click', () => showPage(loginPage));
+
+        // Dashboard Navigation Buttons
+        document.getElementById('incidents-btn').addEventListener('click', () => {
+            showPage(incidentsPage);
+            loadIncidents();
+        });
+        document.getElementById('personnel-btn').addEventListener('click', () => {
+            showPage(personnelPage);
+            loadPersonnel();
+        });
+        document.getElementById('response-units-btn').addEventListener('click', () => {
+            showPage(responseUnitsPage);
+            loadResponseUnits();
+        });
+
+        // Back to Dashboard Buttons
+        document.getElementById('back-to-dashboard-from-incidents').addEventListener('click', () => showPage(dashboardPage));
+        document.getElementById('back-to-dashboard-from-personnel').addEventListener('click', () => showPage(dashboardPage));
+        document.getElementById('back-to-dashboard-from-response-units').addEventListener('click', () => showPage(dashboardPage));
+
+        // Register Form Submission
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value.trim();
+            const password = document.getElementById('register-password').value.trim();
+            if (!username || !password) {
+                document.getElementById('register-error').textContent = 'Username and password are required';
+                document.getElementById('register-error').classList.remove('hidden');
+                return;
+            }
+            console.log('Register request body:', { username, password });
+            try {
+                const response = await fetch('http://localhost:8080/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const result = await response.text();
+                console.log('Register response:', result);
+                if (response.ok) {
+                    showPage(loginPage);
+                    document.getElementById('register-error').classList.add('hidden');
+                    document.getElementById('register-form').reset();
+                } else {
+                    document.getElementById('register-error').textContent = result || 'Registration failed';
+                    document.getElementById('register-error').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Register error:', error);
+                document.getElementById('register-error').textContent = 'Error registering user: ' + error.message;
+                document.getElementById('register-error').classList.remove('hidden');
+            }
+        });
+
+        // Login Form Submission
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            if (!username || !password) {
+                document.getElementById('login-error').textContent = 'Username and password are required';
+                document.getElementById('login-error').classList.remove('hidden');
+                return;
+            }
+            console.log('Login request body:', { username, password });
+            try {
+                const response = await fetch('http://localhost:8080/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const result = await response.text();
+                console.log('Login response:', result);
+                if (response.ok) {
+                    localStorage.setItem('loggedInUser', username);
+                    showPage(dashboardPage);
+                    document.getElementById('login-error').classList.add('hidden');
+                    document.getElementById('login-form').reset();
+                } else {
+                    document.getElementById('login-error').textContent = result || 'Login failed';
+                    document.getElementById('login-error').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                document.getElementById('login-error').textContent = 'Error logging in: ' + error.message;
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        });
+
+        // Logout
+        document.getElementById('logout-button').addEventListener('click', () => {
+            localStorage.removeItem('loggedInUser');
+            showPage(loginPage);
+        });
+
+        // Check if user is logged in
+        if (localStorage.getItem('loggedInUser')) {
+            showPage(dashboardPage);
+        } else {
+            showPage(loginPage);
+        }
+
+        // Incident CRUD
+        const incidentModal = document.getElementById('incident-modal');
+        const incidentForm = document.getElementById('incident-form');
+        const incidentModalTitle = document.getElementById('incident-modal-title');
+        let currentIncidentId = null;
+
+        async function loadIncidents() {
+            try {
+                const incidentsResponse = await fetch('http://localhost:8080/api/incidents');
+                const incidents = await incidentsResponse.json();
+                const incidentsTable = document.getElementById('incidents-table');
+                incidentsTable.innerHTML = '';
+                incidents.forEach(incident => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-4 py-2">${incident.type}</td>
+                        <td class="px-4 py-2">${incident.location}</td>
+                        <td class="px-4 py-2">${incident.severity}</td>
+                        <td class="px-4 py-2">${incident.status}</td>
+                        <td class="px-4 py-2">${new Date(incident.dateTime).toLocaleString()}</td>
+                        <td class="px-4 py-2">
+                            <button class="edit-incident-btn bg-blue-500 text-white py-1 px-2 rounded-md hover:bg-blue-600" data-id="${incident.id}">Edit</button>
+                            <button class="delete-incident-btn bg-red-500 text-white py-1 px-2 rounded-md hover:bg-red-600" data-id="${incident.id}">Delete</button>
+                        </td>
+                    `;
+                    incidentsTable.appendChild(row);
+                });
+
+                // Add event listeners for edit and delete buttons
+                document.querySelectorAll('.edit-incident-btn').forEach(btn => {
+                    btn.addEventListener('click', () => editIncident(btn.dataset.id));
+                });
+                document.querySelectorAll('.delete-incident-btn').forEach(btn => {
+                    btn.addEventListener('click', () => deleteIncident(btn.dataset.id));
+                });
+            } catch (error) {
+                console.error('Error fetching incidents:', error);
+            }
+        }
+
+        document.getElementById('add-incident-btn').addEventListener('click', () => {
+            incidentModalTitle.textContent = 'Add Incident';
+            currentIncidentId = null;
+            incidentForm.reset();
+            incidentModal.classList.remove('hidden');
+        });
+
+        document.getElementById('incident-modal-close').addEventListener('click', () => {
+            incidentModal.classList.add('hidden');
+        });
+
+        incidentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const incident = {
+                type: document.getElementById('incident-type').value.trim(),
+                location: document.getElementById('incident-location').value.trim(),
+                severity: document.getElementById('incident-severity').value,
+                status: document.getElementById('incident-status').value,
+                dateTime: new Date(document.getElementById('incident-date-time').value).toISOString()
+            };
+            try {
+                const url = currentIncidentId ? `/api/incidents/${currentIncidentId}` : '/api/incidents';
+                const method = currentIncidentId ? 'PUT' : 'POST';
+                const response = await fetch(`http://localhost:8080${url}`, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(incident)
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    incidentModal.classList.add('hidden');
+                    loadIncidents();
+                } else {
+                    alert(result.message || 'Error saving incident');
+                }
+            } catch (error) {
+                console.error('Error saving incident:', error);
+                alert('Error saving incident');
+            }
+        });
+
+        async function editIncident(id) {
+            try {
+                const response = await fetch(`http://localhost:8080/api/incidents`);
+                const incidents = await response.json();
+                const incident = incidents.find(inc => inc.id == id);
+                if (!incident) throw new Error('Incident not found');
+                document.getElementById('incident-type').value = incident.type;
+                document.getElementById('incident-location').value = incident.location;
+                document.getElementById('incident-severity').value = incident.severity;
+                document.getElementById('incident-status').value = incident.status;
+                document.getElementById('incident-date-time').value = new Date(incident.dateTime).toISOString().slice(0, 16);
+                incidentModalTitle.textContent = 'Edit Incident';
+                currentIncidentId = id;
+                incidentModal.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading incident:', error);
+                alert('Error loading incident');
+            }
+        }
+
+        async function deleteIncident(id) {
+            if (!confirm('Are you sure you want to delete this incident?')) return;
+            try {
+                const response = await fetch(`http://localhost:8080/api/incidents/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.text();
+                if (response.ok) {
+                    loadIncidents();
+                } else {
+                    alert(result || 'Error deleting incident');
+                }
+            } catch (error) {
+                console.error('Error deleting incident:', error);
+                alert('Error deleting incident');
+            }
+        }
+
+        // Personnel CRUD
+        const personnelModal = document.getElementById('personnel-modal');
+        const personnelForm = document.getElementById('personnel-form');
+        const personnelModalTitle = document.getElementById('personnel-modal-title');
+        let currentPersonnelId = null;
+
+        async function loadPersonnel() {
+            try {
+                const personnelResponse = await fetch('http://localhost:8080/api/personnel');
+                const personnel = await personnelResponse.json();
+                const personnelTable = document.getElementById('personnel-table');
+                personnelTable.innerHTML = '';
+                personnel.forEach(person => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-4 py-2">${person.name}</td>
+                        <td class="px-4 py-2">${person.role}</td>
+                        <td class="px-4 py-2">
+                            <button class="edit-personnel-btn bg-blue-500 text-white py-1 px-2 rounded-md hover:bg-blue-600" data-id="${person.id}">Edit</button>
+                            <button class="delete-personnel-btn bg-red-500 text-white py-1 px-2 rounded-md hover:bg-red-600" data-id="${person.id}">Delete</button>
+                        </td>
+                    `;
+                    personnelTable.appendChild(row);
+                });
+
+                // Add event listeners for edit and delete buttons
+                document.querySelectorAll('.edit-personnel-btn').forEach(btn => {
+                    btn.addEventListener('click', () => editPersonnel(btn.dataset.id));
+                });
+                document.querySelectorAll('.delete-personnel-btn').forEach(btn => {
+                    btn.addEventListener('click', () => deletePersonnel(btn.dataset.id));
+                });
+            } catch (error) {
+                console.error('Error fetching personnel:', error);
+            }
+        }
+
+        document.getElementById('add-personnel-btn').addEventListener('click', () => {
+            personnelModalTitle.textContent = 'Add Personnel';
+            currentPersonnelId = null;
+            personnelForm.reset();
+            personnelModal.classList.remove('hidden');
+        });
+
+        document.getElementById('personnel-modal-close').addEventListener('click', () => {
+            personnelModal.classList.add('hidden');
+        });
+
+        personnelForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const personnel = {
+                name: document.getElementById('personnel-name').value.trim(),
+                role: document.getElementById('personnel-role').value.trim()
+            };
+            try {
+                const url = currentPersonnelId ? `/api/personnel/${currentPersonnelId}` : '/api/personnel';
+                const method = currentPersonnelId ? 'PUT' : 'POST';
+                const response = await fetch(`http://localhost:8080${url}`, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(personnel)
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    personnelModal.classList.add('hidden');
+                    loadPersonnel();
+                } else {
+                    alert(result.message || 'Error saving personnel');
+                }
+            } catch (error) {
+                console.error('Error saving personnel:', error);
+                alert('Error saving personnel');
+            }
+        });
+
+        async function editPersonnel(id) {
+            try {
+                const response = await fetch(`http://localhost:8080/api/personnel`);
+                const personnelList = await response.json();
+                const person = personnelList.find(p => p.id == id);
+                if (!person) throw new Error('Personnel not found');
+                document.getElementById('personnel-name').value = person.name;
+                document.getElementById('personnel-role').value = person.role;
+                personnelModalTitle.textContent = 'Edit Personnel';
+                currentPersonnelId = id;
+                personnelModal.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading personnel:', error);
+                alert('Error loading personnel');
+            }
+        }
+
+        async function deletePersonnel(id) {
+            if (!confirm('Are you sure you want to delete this personnel?')) return;
+            try {
+                const response = await fetch(`http://localhost:8080/api/personnel/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.text();
+                if (response.ok) {
+                    loadPersonnel();
+                } else {
+                    alert(result || 'Error deleting personnel');
+                }
+            } catch (error) {
+                console.error('Error deleting personnel:', error);
+                alert('Error deleting personnel');
+            }
+        }
+
+        // Response Unit CRUD
+        const responseUnitModal = document.getElementById('response-unit-modal');
+        const responseUnitForm = document.getElementById('response-unit-form');
+        const responseUnitModalTitle = document.getElementById('response-unit-modal-title');
+        let currentResponseUnitId = null;
+
+        async function loadResponseUnits() {
+            try {
+                const responseUnitsResponse = await fetch('http://localhost:8080/api/response-units');
+                const responseUnits = await responseUnitsResponse.json();
+                const responseUnitsTable = document.getElementById('response-units-table');
+                responseUnitsTable.innerHTML = '';
+                responseUnits.forEach(unit => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-4 py-2">${unit.type}</td>
+                        <td class="px-4 py-2">${unit.status}</td>
+                        <td class="px-4 py-2">${unit.arrivalTime ? new Date(unit.arrivalTime).toLocaleString() : 'N/A'}</td>
+                        <td class="px-4 py-2">
+                            <button class="edit-response-unit-btn bg-blue-500 text-white py-1 px-2 rounded-md hover:bg-blue-600" data-id="${unit.id}">Edit</button>
+                            <button class="delete-response-unit-btn bg-red-500 text-white py-1 px-2 rounded-md hover:bg-red-600" data-id="${unit.id}">Delete</button>
+                        </td>
+                    `;
+                    responseUnitsTable.appendChild(row);
+                });
+
+                // Add event listeners for edit and delete buttons
+                document.querySelectorAll('.edit-response-unit-btn').forEach(btn => {
+                    btn.addEventListener('click', () => editResponseUnit(btn.dataset.id));
+                });
+                document.querySelectorAll('.delete-response-unit-btn').forEach(btn => {
+                    btn.addEventListener('click', () => deleteResponseUnit(btn.dataset.id));
+                });
+            } catch (error) {
+                console.error('Error fetching response units:', error);
+            }
+        }
+
+        document.getElementById('add-response-unit-btn').addEventListener('click', () => {
+            responseUnitModalTitle.textContent = 'Add Response Unit';
+            currentResponseUnitId = null;
+            responseUnitForm.reset();
+            responseUnitModal.classList.remove('hidden');
+        });
+
+        document.getElementById('response-unit-modal-close').addEventListener('click', () => {
+            responseUnitModal.classList.add('hidden');
+        });
+
+        responseUnitForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const arrivalTimeValue = document.getElementById('response-unit-arrival-time').value;
+            const responseUnit = {
+                type: document.getElementById('response-unit-type').value.trim(),
+                status: document.getElementById('response-unit-status').value,
+                arrivalTime: arrivalTimeValue ? new Date(arrivalTimeValue).toISOString() : null
+            };
+            try {
+                const url = currentResponseUnitId ? `/api/response-units/${currentResponseUnitId}` : '/api/response-units';
+                const method = currentResponseUnitId ? 'PUT' : 'POST';
+                const response = await fetch(`http://localhost:8080${url}`, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(responseUnit)
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    responseUnitModal.classList.add('hidden');
+                    loadResponseUnits();
+                } else {
+                    alert(result.message || 'Error saving response unit');
+                }
+            } catch (error) {
+                console.error('Error saving response unit:', error);
+                alert('Error saving response unit');
+            }
+        });
+
+        async function editResponseUnit(id) {
+            try {
+                const response = await fetch(`http://localhost:8080/api/response-units`);
+                const responseUnits = await response.json();
+                const unit = responseUnits.find(u => u.id == id);
+                if (!unit) throw new Error('Response Unit not found');
+                document.getElementById('response-unit-type').value = unit.type;
+                document.getElementById('response-unit-status').value = unit.status;
+                document.getElementById('response-unit-arrival-time').value = unit.arrivalTime ? new Date(unit.arrivalTime).toISOString().slice(0, 16) : '';
+                responseUnitModalTitle.textContent = 'Edit Response Unit';
+                currentResponseUnitId = id;
+                responseUnitModal.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading response unit:', error);
+                alert('Error loading response unit');
+            }
+        }
+
+        async function deleteResponseUnit(id) {
+            if (!confirm('Are you sure you want to delete this response unit?')) return;
+            try {
+                const response = await fetch(`http://localhost:8080/api/response-units/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.text();
+                if (response.ok) {
+                    loadResponseUnits();
+                } else {
+                    alert(result || 'Error deleting response unit');
+                }
+            } catch (error) {
+                console.error('Error deleting response unit:', error);
+                alert('Error deleting response unit');
+            }
+        }
+    </script>
+</body>
+</html>-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Safety System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
+        }
+        .hidden {
+            display: none;
+        }
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: scale(0.95);
+            animation: scaleIn 0.3s ease-out forwards;
+        }
+        @keyframes scaleIn {
+            to { transform: scale(1); }
+        }
+        .dashboard-container {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+        .dashboard-card {
+            background: white;
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .card-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .btn-primary {
+            background: linear-gradient(to right, #4f46e5, #6366f1);
+            color: white;
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #4338ca, #4f46e5);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: linear-gradient(to right, #64748b, #94a3b8);
+            color: white;
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+        }
+        .btn-secondary:hover {
+            background: linear-gradient(to right, #475569, #64748b);
+            box-shadow: 0 10px 15px -3px rgba(100, 116, 139, 0.4);
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: linear-gradient(to right, #ef4444, #f87171);
+            color: white;
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+        }
+        .btn-danger:hover {
+            background: linear-gradient(to right, #dc2626, #ef4444);
+            box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.4);
+            transform: translateY(-2px);
+        }
+        .input-field {
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .input-field:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+            outline: none;
+        }
+        .auth-container {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        .auth-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .auth-footer {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        thead {
+            position: sticky;
+            top: 0;
+            background: #f8fafc;
+            z-index: 10;
+        }
+        th {
+            font-weight: 600;
+            color: #1e293b;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .status-active {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }
+        .status-resolved {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: #4f46e5;
+        }
+        .status-available {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }
+        .status-assigned {
+            background-color: rgba(234, 179, 8, 0.1);
+            color: #ca8a04;
+        }
+        .severity-low {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }
+        .severity-medium {
+            background-color: rgba(234, 179, 8, 0.1);
+            color: #ca8a04;
+        }
+        .severity-high {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+        }
+        .action-btn {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .action-btn-edit {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+        .action-btn-edit:hover {
+            background-color: rgba(59, 130, 246, 0.2);
+        }
+        .action-btn-delete {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        .action-btn-delete:hover {
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: #4f46e5;
+        }
+        .nav-link .icon {
+            font-size: 1.25rem;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <!-- Login Page -->
+    <div id="login-page" class="auth-container hidden">
+        <div class="auth-header">
+            <h2 class="text-3xl font-bold text-gray-800">Welcome Back</h2>
+            <p class="text-gray-500 mt-2">Sign in to access your dashboard</p>
+        </div>
+        <form id="login-form" class="space-y-5">
+            <div>
+                <label for="login-username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <input type="text" id="login-username" class="input-field" required>
+            </div>
+            <div>
+                <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="login-password" class="input-field" required>
+            </div>
+            <button type="submit" class="w-full btn-primary py-3">Sign In</button>
+        </form>
+        <div class="auth-footer">
+            <p class="text-gray-600">Don't have an account?</p>
+            <button id="show-register" class="mt-2 text-indigo-600 font-medium hover:text-indigo-700">Create an account</button>
+        </div>
+        <p id="login-error" class="mt-4 text-center text-red-600 hidden"></p>
+    </div>
+
+    <!-- Register Page -->
+    <div id="register-page" class="auth-container hidden">
+        <div class="auth-header">
+            <h2 class="text-3xl font-bold text-gray-800">Create Account</h2>
+            <p class="text-gray-500 mt-2">Sign up to get started</p>
+        </div>
+        <form id="register-form" class="space-y-5">
+            <div>
+                <label for="register-username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <input type="text" id="register-username" class="input-field" required>
+            </div>
+            <div>
+                <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="register-password" class="input-field" required>
+            </div>
+            <button type="submit" class="w-full btn-primary py-3">Create Account</button>
+        </form>
+        <div class="auth-footer">
+            <p class="text-gray-600">Already have an account?</p>
+            <button id="show-login" class="mt-2 text-indigo-600 font-medium hover:text-indigo-700">Sign in</button>
+        </div>
+        <p id="register-error" class="mt-4 text-center text-red-600 hidden"></p>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="dashboard-page" class="w-full max-w-7xl hidden">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="bg-indigo-100 rounded-full p-3">
+                        <i class="fas fa-shield-alt text-indigo-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Public Safety System</h2>
+                        <p class="text-gray-500">Command Center Dashboard</p>
+                    </div>
+                </div>
+                <button id="logout-button" class="btn-danger flex items-center gap-2">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-600 mb-8">Welcome to the Public Safety Command Center. Access all emergency management tools from this dashboard.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="dashboard-card">
+                        <div class="p-6">
+                            <div class="card-icon bg-red-100 text-red-600">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Incidents</h3>
+                            <p class="text-gray-500 mb-6">Manage emergency incidents and track response status</p>
+                            <button id="incidents-btn" class="btn-primary w-full flex items-center justify-center gap-2">
+                                <i class="fas fa-arrow-right"></i>
+                                <span>View Incidents</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="p-6">
+                            <div class="card-icon bg-blue-100 text-blue-600">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Personnel</h3>
+                            <p class="text-gray-500 mb-6">Track staff assignments and availability status</p>
+                            <button id="personnel-btn" class="btn-primary w-full flex items-center justify-center gap-2">
+                                <i class="fas fa-arrow-right"></i>
+                                <span>View Personnel</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="p-6">
+                            <div class="card-icon bg-amber-100 text-amber-600">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Response Units</h3>
+                            <p class="text-gray-500 mb-6">Monitor emergency vehicles and equipment status</p>
+                            <button id="response-units-btn" class="btn-primary w-full flex items-center justify-center gap-2">
+                                <i class="fas fa-arrow-right"></i>
+                                <span>View Units</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incidents Page -->
+    <div id="incidents-page" class="w-full max-w-7xl hidden">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="bg-red-100 rounded-full p-3">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Incident Management</h2>
+                </div>
+                <button id="back-to-dashboard-from-incidents" class="btn-secondary flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Dashboard</span>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <p class="text-gray-600">View and manage all emergency incidents from this console.</p>
+                    <button id="add-incident-btn" class="btn-primary flex items-center gap-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Incident</span>
+                    </button>
+                </div>
+                <div class="table-container bg-white rounded-xl">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4">Type</th>
+                                <th class="px-6 py-4">Location</th>
+                                <th class="px-6 py-4">Severity</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4">Date/Time</th>
+                                <th class="px-6 py-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="incidents-table" class="divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Personnel Page -->
+    <div id="personnel-page" class="w-full max-w-7xl hidden">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="bg-blue-100 rounded-full p-3">
+                        <i class="fas fa-users text-blue-600 text-xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Personnel Management</h2>
+                </div>
+                <button id="back-to-dashboard-from-personnel" class="btn-secondary flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Dashboard</span>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <p class="text-gray-600">View and manage all personnel from this console.</p>
+                    <button id="add-personnel-btn" class="btn-primary flex items-center gap-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Personnel</span>
+                    </button>
+                </div>
+                <div class="table-container bg-white rounded-xl">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4">Name</th>
+                                <th class="px-6 py-4">Role</th>
+                                <th class="px-6 py-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="personnel-table" class="divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Response Units Page -->
+    <div id="response-units-page" class="w-full max-w-7xl hidden">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="bg-amber-100 rounded-full p-3">
+                        <i class="fas fa-truck text-amber-600 text-xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Response Units</h2>
+                </div>
+                <button id="back-to-dashboard-from-response-units" class="btn-secondary flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Dashboard</span>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <p class="text-gray-600">View and manage all response units from this console.</p>
+                    <button id="add-response-unit-btn" class="btn-primary flex items-center gap-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Response Unit</span>
+                    </button>
+                </div>
+                <div class="table-container bg-white rounded-xl">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4">Type</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4">Arrival Time</th>
+                                <th class="px-6 py-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="response-units-table" class="divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incident Modal -->
+    <div id="incident-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="incident-modal-title" class="text-2xl font-bold text-gray-800 mb-6"></h3>
+            <form id="incident-form" class="space-y-4">
+                <div>
+                    <label for="incident-type" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <input type="text" id="incident-type" class="input-field" required>
+                </div>
+                <div>
+                    <label for="incident-location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    <input type="text" id="incident-location" class="input-field" required>
+                </div>
+                <div>
+                    <label for="incident-severity" class="block text-sm font-medium text-gray-700 mb-1">Severity</label>
+                    <select id="incident-severity" class="input-field">
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="incident-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="incident-status" class="input-field">
+                        <option value="Active">Active</option>
+                        <option value="Resolved">Resolved</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="incident-date-time" class="block text-sm font-medium text-gray-700 mb-1">Date/Time</label>
+                    <input type="datetime-local" id="incident-date-time" class="input-field" required>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="incident-modal-close" class="btn-secondary">Cancel</button>
+                    <button type="submit" id="incident-modal-save" class="btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Personnel Modal -->
+    <div id="personnel-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="personnel-modal-title" class="text-2xl font-bold text-gray-800 mb-6"></h3>
+            <form id="personnel-form" class="space-y-4">
+                <div>
+                    <label for="personnel-name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input type="text" id="personnel-name" class="input-field" required>
+                </div>
+                <div>
+                    <label for="personnel-role" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                    <input type="text" id="personnel-role" class="input-field" required>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="personnel-modal-close" class="btn-secondary">Cancel</button>
+                    <button type="submit" id="personnel-modal-save" class="btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Response Unit Modal -->
+    <div id="response-unit-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="response-unit-modal-title" class="text-2xl font-bold text-gray-800 mb-6"></h3>
+            <form id="response-unit-form" class="space-y-4">
+                <div>
+                    <label for="response-unit-type" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <input type="text" id="response-unit-type" class="input-field" required>
+                </div>
+                <div>
+                    <label for="response-unit-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="response-unit-status" class="input-field">
+                        <option value="Available">Available</option>
+                        <option value="Assigned">Assigned</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="response-unit-arrival-time" class="block text-sm font-medium text-gray-700 mb-1">Arrival Time (optional)</label>
+                    <input type="datetime-local" id="response-unit-arrival-time" class="input-field">
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="response-unit-modal-close" class="btn-secondary">Cancel</button>
+                    <button type="submit" id="response-unit-modal-save" class="btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Page Navigation
+        const loginPage = document.getElementById('login-page');
+        const registerPage = document.getElementById('register-page');
+        const dashboardPage = document.getElementById('dashboard-page');
+        const incidentsPage = document.getElementById('incidents-page');
+        const personnelPage = document.getElementById('personnel-page');
+        const responseUnitsPage = document.getElementById('response-units-page');
+
+        function showPage(page) {
+            loginPage.classList.add('hidden');
+            registerPage.classList.add('hidden');
+            dashboardPage.classList.add('hidden');
+            incidentsPage.classList.add('hidden');
+            personnelPage.classList.add('hidden');
+            responseUnitsPage.classList.add('hidden');
+            page.classList.remove('hidden');
+            page.classList.add('fade-in');
+        }
+
+        document.getElementById('show-register').addEventListener('click', () => showPage(registerPage));
+        document.getElementById('show-login').addEventListener('click', () => showPage(loginPage));
+
+        // Dashboard Navigation Buttons
+        document.getElementById('incidents-btn').addEventListener('click', () => {
+            showPage(incidentsPage);
+            loadIncidents();
+        });
+        document.getElementById('personnel-btn').addEventListener('click', () => {
+            showPage(personnelPage);
+            loadPersonnel();
+        });
+        document.getElementById('response-units-btn').addEventListener('click', () => {
+            showPage(responseUnitsPage);
+            loadResponseUnits();
+        });
+
+        // Back to Dashboard Buttons
+        document.getElementById('back-to-dashboard-from-incidents').addEventListener('click', () => showPage(dashboardPage));
+        document.getElementById('back-to-dashboard-from-personnel').addEventListener('click', () => showPage(dashboardPage));
+        document.getElementById('back-to-dashboard-from-response-units').addEventListener('click', () => showPage(dashboardPage));
+
+        // Register Form Submission
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value.trim();
+            const password = document.getElementById('register-password').value.trim();
+            if (!username || !password) {
+                document.getElementById('register-error').textContent = 'Username and password are required';
+                document.getElementById('register-error').classList.remove('hidden');
+                return;
+            }
+            console.log('Register request body:', { username, password });
+            try {
+                const response = await fetch('http://localhost:8080/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const result = await response.text();
+                console.log('Register response:', result);
+                if (response.ok) {
+                    showPage(loginPage);
+                    document.getElementById('register-error').classList.add('hidden');
+                    document.getElementById('register-form').reset();
+                } else {
+                    document.getElementById('register-error').textContent = result || 'Registration failed';
+                    document.getElementById('register-error').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                document.getElementById('register-error').textContent = 'Network error. Please try again later.';
+                document.getElementById('register-error').classList.remove('hidden');
+            }
+        });
+
+        // Login Form Submission
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            if (!username || !password) {
+                document.getElementById('login-error').textContent = 'Username and password are required';
+                document.getElementById('login-error').classList.remove('hidden');
+                return;
+            }
+            try {
+                const response = await fetch('http://localhost:8080/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const result = await response.text();
+                if (response.ok) {
+                    localStorage.setItem('token', result);
+                    showPage(dashboardPage);
+                    document.getElementById('login-error').classList.add('hidden');
+                    document.getElementById('login-form').reset();
+                } else {
+                    document.getElementById('login-error').textContent = result || 'Login failed';
+                    document.getElementById('login-error').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                document.getElementById('login-error').textContent = 'Network error. Please try again later.';
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        });
+
+        // Logout Button
+        document.getElementById('logout-button').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            showPage(loginPage);
+        });
+
+        // Check Authentication
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                showPage(dashboardPage);
+            } else {
+                showPage(loginPage);
+            }
+        }
+
+        // Initialize App
+        window.addEventListener('load', checkAuth);
+
+        // === Incidents Management ===
+        const incidentsTable = document.getElementById('incidents-table');
+        const incidentModal = document.getElementById('incident-modal');
+        const incidentForm = document.getElementById('incident-form');
+        const incidentModalTitle = document.getElementById('incident-modal-title');
+        let incidents = [];
+        let currentIncidentId = null;
+
+        // Load Incidents
+        async function loadIncidents() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('http://localhost:8080/api/incidents', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    incidents = await response.json();
+                    renderIncidents();
+                } else {
+                    console.error('Failed to load incidents:', await response.text());
+                }
+            } catch (error) {
+                console.error('Error loading incidents:', error);
+            }
+        }
+
+        // Render Incidents Table
+        function renderIncidents() {
+            incidentsTable.innerHTML = '';
+            incidents.forEach(incident => {
+                const formattedDateTime = new Date(incident.dateTime).toLocaleString();
+                const row = document.createElement('tr');
+                row.classList.add('hover:bg-gray-50');
+                row.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <span class="font-medium text-gray-900">${incident.type}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">${incident.location}</td>
+                    <td class="px-6 py-4">
+                        <span class="status-badge severity-${incident.severity.toLowerCase()}">${incident.severity}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="status-badge status-${incident.status.toLowerCase()}">${incident.status}</span>
+                    </td>
+                    <td class="px-6 py-4">${formattedDateTime}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                            <button class="action-btn action-btn-edit edit-incident" data-id="${incident.id}">
+                                <i class="fas fa-edit mr-1"></i> Edit
+                            </button>
+                            <button class="action-btn action-btn-delete delete-incident" data-id="${incident.id}">
+                                <i class="fas fa-trash mr-1"></i> Delete
+                            </button>
+                        </div>
+                    </td>
+                `;
+                incidentsTable.appendChild(row);
+            });
+
+            // Add event listeners to edit and delete buttons
+            document.querySelectorAll('.edit-incident').forEach(button => {
+                button.addEventListener('click', () => editIncident(button.dataset.id));
+            });
+            document.querySelectorAll('.delete-incident').forEach(button => {
+                button.addEventListener('click', () => deleteIncident(button.dataset.id));
+            });
+        }
+
+        // Open Add Incident Modal
+        document.getElementById('add-incident-btn').addEventListener('click', () => {
+            incidentModalTitle.textContent = 'Add New Incident';
+            currentIncidentId = null;
+            incidentForm.reset();
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('incident-date-time').value = now.toISOString().slice(0, 16);
+            incidentModal.classList.remove('hidden');
+        });
+
+        // Close Incident Modal
+        document.getElementById('incident-modal-close').addEventListener('click', () => {
+            incidentModal.classList.add('hidden');
+        });
+
+        // Edit Incident
+        function editIncident(id) {
+            const incident = incidents.find(inc => inc.id == id);
+            if (incident) {
+                incidentModalTitle.textContent = 'Edit Incident';
+                currentIncidentId = id;
+                document.getElementById('incident-type').value = incident.type;
+                document.getElementById('incident-location').value = incident.location;
+                document.getElementById('incident-severity').value = incident.severity;
+                document.getElementById('incident-status').value = incident.status;
+                
+                // Format date for datetime-local input
+                const date = new Date(incident.dateTime);
+                date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+                document.getElementById('incident-date-time').value = date.toISOString().slice(0, 16);
+                
+                incidentModal.classList.remove('hidden');
+            }
+        }
+
+        // Delete Incident
+        async function deleteIncident(id) {
+            if (confirm('Are you sure you want to delete this incident?')) {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch(`http://localhost:8080/api/incidents/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (response.ok) {
+                        incidents = incidents.filter(inc => inc.id != id);
+                        renderIncidents();
+                    } else {
+                        console.error('Failed to delete incident:', await response.text());
+                    }
+                } catch (error) {
+                    console.error('Error deleting incident:', error);
+                }
+            }
+        }
+
+        // Save Incident
+        incidentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const incidentData = {
+                type: document.getElementById('incident-type').value,
+                location: document.getElementById('incident-location').value,
+                severity: document.getElementById('incident-severity').value,
+                status: document.getElementById('incident-status').value,
+                dateTime: new Date(document.getElementById('incident-date-time').value).toISOString()
+            };
+
+            const token = localStorage.getItem('token');
+            try {
+                let response;
+                if (currentIncidentId) {
+                    // Update existing incident
+                    response = await fetch(`http://localhost:8080/api/incidents/${currentIncidentId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(incidentData)
+                    });
+                } else {
+                    // Add new incident
+                    response = await fetch('http://localhost:8080/api/incidents', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(incidentData)
+                    });
+                }
+
+                if (response.ok) {
+                    incidentModal.classList.add('hidden');
+                    loadIncidents();
+                } else {
+                    console.error('Failed to save incident:', await response.text());
+                }
+            } catch (error) {
+                console.error('Error saving incident:', error);
+            }
+        });
+
+        // === Personnel Management ===
+        const personnelTable = document.getElementById('personnel-table');
+        const personnelModal = document.getElementById('personnel-modal');
+        const personnelForm = document.getElementById('personnel-form');
+        const personnelModalTitle = document.getElementById('personnel-modal-title');
+        let personnel = [];
+        let currentPersonnelId = null;
+
+        // Load Personnel
+        async function loadPersonnel() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('http://localhost:8080/api/personnel', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    personnel = await response.json();
+                    renderPersonnel();
+                } else {
+                    console.error('Failed to load personnel:', await response.text());
+                }
+            } catch (error) {
+                console.error('Error loading personnel:', error);
+            }
+        }
+
+        // Render Personnel Table
+        function renderPersonnel() {
+            personnelTable.innerHTML = '';
+            personnel.forEach(person => {
+                const row = document.createElement('tr');
+                row.classList.add('hover:bg-gray-50');
+                row.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-100 text-blue-600 rounded-full h-8 w-8 flex items-center justify-center">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span class="font-medium text-gray-900">${person.name}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">${person.role}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                            <button class="action-btn action-btn-edit edit-personnel" data-id="${person.id}">
+                                <i class="fas fa-edit mr-1"></i> Edit
+                            </button>
+                            <button class="action-btn action-btn-delete delete-personnel" data-id="${person.id}">
+                                <i class="fas fa-trash mr-1"></i> Delete
+                            </button>
+                        </div>
+                    </td>
+                `;
+                personnelTable.appendChild(row);
+            });
+
+            // Add event listeners to edit and delete buttons
+            document.querySelectorAll('.edit-personnel').forEach(button => {
+                button.addEventListener('click', () => editPersonnel(button.dataset.id));
+            });
+            document.querySelectorAll('.delete-personnel').forEach(button => {
+                button.addEventListener('click', () => deletePersonnel(button.dataset.id));
+            });
+        }
+
+        // Open Add Personnel Modal
+        document.getElementById('add-personnel-btn').addEventListener('click', () => {
+            personnelModalTitle.textContent = 'Add New Personnel';
+            currentPersonnelId = null;
+            personnelForm.reset();
+            personnelModal.classList.remove('hidden');
+        });
+
+        // Close Personnel Modal
+        document.getElementById('personnel-modal-close').addEventListener('click', () => {
+            personnelModal.classList.add('hidden');
+        });
+
+        // Edit Personnel
+        function editPersonnel(id) {
+            const person = personnel.find(p => p.id == id);
+            if (person) {
+                personnelModalTitle.textContent = 'Edit Personnel';
+                currentPersonnelId = id;
+                document.getElementById('personnel-name').value = person.name;
+                document.getElementById('personnel-role').value = person.role;
+                personnelModal.classList.remove('hidden');
+            }
+        }
+
+        // Delete Personnel
+        async function deletePersonnel(id) {
+            if (confirm('Are you sure you want to delete this personnel record?')) {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch(`http://localhost:8080/api/personnel/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (response.ok) {
+                        personnel = personnel.filter(p => p.id != id);
+                        renderPersonnel();
+                    } else {
+                        console.error('Failed to delete personnel:', await response.text());
+                    }
+                } catch (error) {
+                    console.error('Error deleting personnel:', error);
+                }
+            }
+        }
+
+        // Save Personnel
+        personnelForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const personnelData = {
+                name: document.getElementById('personnel-name').value,
+                role: document.getElementById('personnel-role').value
+            };
+
+            const token = localStorage.getItem('token');
+            try {
+                let response;
+                if (currentPersonnelId) {
+                    // Update existing personnel
+                    response = await fetch(`http://localhost:8080/api/personnel/${currentPersonnelId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(personnelData)
+                    });
+                } else {
+                    // Add new personnel
+                    response = await fetch('http://localhost:8080/api/personnel', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(personnelData)
+                    });
+                }
+
+                if (response.ok) {
+                    personnelModal.classList.add('hidden');
+                    loadPersonnel();
+                } else {
+                    console.error('Failed to save personnel:', await response.text());
+                }
+            } catch (error) {
+                console.error('Error saving personnel:', error);
+            }
+        });
+
+        // === Response Units Management ===
+        const responseUnitsTable = document.getElementById('response-units-table');
+        const responseUnitModal = document.getElementById('response-unit-modal');
+        const responseUnitForm = document.getElementById('response-unit-form');
+        const responseUnitModalTitle = document.getElementById('response-unit-modal-title');
+        let responseUnits = [];
+        let currentResponseUnitId = null;
+
+        // Load Response Units
+        async function loadResponseUnits() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('http://localhost:8080/api/response-units', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    responseUnits = await response.json();
+                    renderResponseUnits();
+                } else {
+                    console.error('Failed to load response units:', await response.text());
+                }
+            } catch (error) {
+                console.error('Error loading response units:', error);
+            }
+        }
+
+        // Render Response Units Table
+        function renderResponseUnits() {
+            responseUnitsTable.innerHTML = '';
+            responseUnits.forEach(unit => {
+                const arrivalTime = unit.arrivalTime ? new Date(unit.arrivalTime).toLocaleString() : 'N/A';
+                const row = document.createElement('tr');
+                row.classList.add('hover:bg-gray-50');
+                row.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-amber-100 text-amber-600 rounded-full h-8 w-8 flex items-center justify-center">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <span class="font-medium text-gray-900">${unit.type}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="status-badge status-${unit.status.toLowerCase()}">${unit.status}</span>
+                    </td>
+                    <td class="px-6 py-4">${arrivalTime}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                            <button class="action-btn action-btn-edit edit-response-unit" data-id="${unit.id}">
+                                <i class="fas fa-edit mr-1"></i> Edit
+                            </button>
+                            <button class="action-btn action-btn-delete delete-response-unit" data-id="${unit.id}">
+                                <i class="fas fa-trash mr-1"></i> Delete
+                            </button>
+                        </div>
+                    </td>
+                `;
+                responseUnitsTable.appendChild(row);
+            });
+
+            // Add event listeners to edit and delete buttons
+            document.querySelectorAll('.edit-response-unit').forEach(button => {
+                button.addEventListener('click', () => editResponseUnit(button.dataset.id));
+            });
+            document.querySelectorAll('.delete-response-unit').forEach(button => {
+                button.addEventListener('click', () => deleteResponseUnit(button.dataset.id));
+            });
+        }
+
+        // Open Add Response Unit Modal
+        document.getElementById('add-response-unit-btn').addEventListener('click', () => {
+            responseUnitModalTitle.textContent = 'Add New Response Unit';
+            currentResponseUnitId = null;
+            responseUnitForm.reset();
+            responseUnitModal.classList.remove('hidden');
+        });
+
+        // Close Response Unit Modal
+        document.getElementById('response-unit-modal-close').addEventListener('click', () => {
+            responseUnitModal.classList.add('hidden');
+        });
+
+        // Edit Response Unit
+        function editResponseUnit(id) {
+            const unit = responseUnits.find(u => u.id == id);
+            if (unit) {
+                responseUnitModalTitle.textContent = 'Edit Response Unit';
+                currentResponseUnitId = id;
+                document.getElementById('response-unit-type').value = unit.type;
+                document.getElementById('response-unit-status').value = unit.status;
+                
+                if (unit.arrivalTime) {
+                    // Format date for datetime-local input
+                    const date = new Date(unit.arrivalTime);
+                    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+                    document.getElementById('response-unit-arrival-time').value = date.toISOString().slice(0, 16);
+                } else {
+                    document.getElementById('response-unit-arrival-time').value = '';
+                }
+                
+                responseUnitModal.classList.remove('hidden');
+            }
+        }
+
+        // Delete Response Unit
+        async function deleteResponseUnit(id) {
+            if (confirm('Are you sure you want to delete this response unit?')) {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch(`http://localhost:8080/api/response-units/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (response.ok) {
+                        responseUnits = responseUnits.filter(u => u.id != id);
+                        renderResponseUnits();
+                    } else {
+                        console.error('Failed to delete response unit:', await response.text());
+                    }
+                } catch (error) {
+                    console.error('Error deleting response unit:', error);
+                }
+            }
+        }
+
+        // Save Response Unit
+        responseUnitForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const arrivalTimeInput = document.getElementById('response-unit-arrival-time').value;
+            
+            const responseUnitData = {
+                type: document.getElementById('response-unit-type').value,
+                status: document.getElementById('response-unit-status').value,
+                arrivalTime: arrivalTimeInput ? new Date(arrivalTimeInput).toISOString() : null
+            };
+
+            const token = localStorage.getItem('token');
+            try {
+                let response;
+                if (currentResponseUnitId) {
+                    // Update existing response unit
+                    response = await fetch(`http://localhost:8080/api/response-units/${currentResponseUnitId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(responseUnitData)
+                    });
+                } else {
+                    // Add new response unit
+                    response = await fetch('http://localhost:8080/api/response-units', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(responseUnitData)
+                    });
+                }
+
+                if (response.ok) {
+                    responseUnitModal.classList.add('hidden');
+                    loadResponseUnits();
+                } else {
+                    console.error('Failed to save response unit:', await response.text());
+                }
+            } catch (error) {
+                console.error('Error saving response unit:', error);
+            }
+        });
+
+        // Handle clicks outside modals to close them
+        window.addEventListener('click', (e) => {
+            if (e.target === incidentModal) {
+                incidentModal.classList.add('hidden');
+            }
+            if (e.target === personnelModal) {
+                personnelModal.classList.add('hidden');
+            }
+            if (e.target === responseUnitModal) {
+                responseUnitModal.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
